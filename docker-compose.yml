@@ -1,0 +1,30 @@
+version: "3.7"
+
+services:
+  item-db:
+    container_name: item-db
+    image: mongo:3
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.runCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - app-db:/data/db
+    ports:
+      - "27017:27017"
+    restart: always
+
+  item-app:
+    container_name: item-app
+    image: ghcr.io/druzxh/item-app:v1
+    depends_on:
+      item-db:
+        condition: service_healthy
+    ports:
+      - "80:8080"
+    restart: always
+
+volumes:
+  app-db:
+    name: "app-db"
